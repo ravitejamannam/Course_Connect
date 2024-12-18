@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
-console.log('connected to Mongoose');
-mongoose.connect('mongodb+srv://ravitejamannam88:qaeuMivhDDN1E1z6@courseconnect.illiy.mongodb.net/')
+
 
 
 
@@ -40,7 +39,7 @@ const adminModel = mongoose.model("admin", adminSchema);
 const courseModel = mongoose.model("course", courseSchema);
 const purchaseModel = mongoose.model("purchase", purchaseSchema);
 
-module.export = {
+module.exports = {
     userModel,
     adminModel,
     courseModel,
