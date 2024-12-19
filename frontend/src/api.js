@@ -22,7 +22,42 @@ export const signup = async (userData) => {
     }
 };
 
-export const signin = (userData) => API.post('/user/signin', userData);
-export const getCourses = () => API.get('/course/preview');
-export const purchaseCourse = (courseId) => API.post('/course/purchase', { courseId });
-export const getPurchases = () => API.get('/user/purchases');
+export const signin = async (userData) => {
+    try {
+        const { data } = await API.post('/user/signin', userData);
+        return data;
+    } catch (error) {
+        console.error('Signin Error:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const getCourses = async () => {
+    try {
+        const { data } = await API.get('/course/preview');
+        return data;
+    } catch (error) {
+        console.error('Get Courses Error:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const purchaseCourse = async (courseId) => {
+    try {
+        const { data } = await API.post('/course/purchase', { courseId });
+        return data;
+    } catch (error) {
+        console.error('Purchase Course Error:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const getPurchases = async () => {
+    try {
+        const { data } = await API.get('/user/purchases');
+        return data;
+    } catch (error) {
+        console.error('Get Purchases Error:', error.response?.data || error.message);
+        throw error;
+    }
+};
