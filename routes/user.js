@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const {userMiddleware} = require("../middleware/user");
 const { userModel } = require("../db");
 const jwt = require("jsonwebtoken");
 const { JWT_USER_PASSWORD } = require("../config");
@@ -44,9 +45,15 @@ userRouter.post("/signin", async function(req, res) {
     
 })
 
-userRouter.get("/purchases", function(req, res) {
+userRouter.get("/purchases", userMiddleware,async function(req, res) {
+    const userId = req.userId;
+
+    const purchases = await purchaseModel.findOne({
+        userId,
+        courseId
+    })
     res.json({
-        message: "signup endpoint"
+        purchases
     })
 })
 
