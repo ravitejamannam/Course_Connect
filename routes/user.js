@@ -1,76 +1,104 @@
 const { Router } = require("express");
-const { userModel,purchaseModel, courseModel} = require("../db");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const  { JWT_USER_PASSWORD } = require("../config");
+const { z } = require("zod");
+const { userModel, purchaseModel, courseModel } = require("../db");
 const { userMiddleware } = require("../middleware/user");
+const { JWT_USER_PASSWORD } = require("../config");
 
 const userRouter = Router();
 
+// Zod schema for user validation
+const userSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+});
+
 userRouter.post("/signup", async function(req, res) {
-    const { email, password, firstName, lastName } = req.body; // TODO: adding zod validation
-    // TODO: hash the password so plaintext pw is not stored in the DB
+    try {
+        // Validate user data
+        const validation = userSchema.safeParse(req.body);
+        if (!validation.success) {
+            return res.status(400).json({ errors: validation.error.errors });
+        }
 
-    // TODO: Put inside a try catch block
-    await userModel.create({
-        email: email,
-        password: password,
-        firstName: firstName, 
-        lastName: lastName
-    })
-    
-    res.json({
-        message: "Signup succeeded"
-    })
-})
+        const { email, password, firstName, lastName } = req.body;
 
-userRouter.post("/signin",async function(req, res) {
-    const { email, password } = req.body;
+        // Check if the email already exists
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already in use" });
+        }
 
-    // TODO: ideally password should be hashed, and hence you cant compare the user provided password and the database password
-    const user = await userModel.findOne({
-        email: email,
-        password: password
-    }); //[]
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (user) {
-        const token = jwt.sign({
-            id: user._id,
-        }, JWT_USER_PASSWORD);
-
-        // Do cookie logic
+        // Create a new user
+        await userModel.create({
+            email: email,
+            password: hashedPassword,
+            firstName: firstName,
+            lastName: lastName,
+        });
 
         res.json({
-            token: token
-        })
-    } else {
-        res.status(403).json({
-            message: "Incorrect credentials"
-        })
+            message: "Signup succeeded",
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-})
+});
+
+userRouter.post("/signin", async function(req, res) {
+    try {
+        const { email, password } = req.body;
+
+        const user = await userModel.findOne({ email });
+        if (user) {
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (isPasswordValid) {
+                const token = jwt.sign({ id: user._id }, JWT_USER_PASSWORD);
+
+                // TODO: cookie logic/session logic
+                res.json({ token: token });
+            } else {
+                res.status(403).json({ message: "Invalid credentials" });
+            }
+        } else {
+            res.status(403).json({ message: "Invalid credentials" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 userRouter.get("/purchases", userMiddleware, async function(req, res) {
-    const userId = req.userId;
+    try {
+        const userId = req.userId;
 
-    const purchases = await purchaseModel.find({
-        userId,
-    });
+        const purchases = await purchaseModel.find({ userId });
 
-    let purchasedCourseIds = [];
+        let purchasedCourseIds = [];
 
-    for (let i = 0; i < purchases.length; i++) {
-        purchasedCourseIds.push(purchases[i].courseId);
+        for (let i = 0; i < purchases.length; i++) {
+            purchasedCourseIds.push(purchases[i].courseId);
+        }
+
+        const coursesData = await courseModel.find({
+            _id: { $in: purchasedCourseIds },
+        });
+
+        res.json({
+            purchases,
+            coursesData,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    const coursesData = await courseModel.find({
-        _id: { $in: purchasedCourseIds }
-    });
-
-    res.json({
-        purchases,
-        coursesData
-    })
-})
+});
 
 module.exports = {
-    userRouter: userRouter
-}
+    userRouter: userRouter,
+};

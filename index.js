@@ -14,8 +14,13 @@ app.use("/api/v1/course", courseRouter);
 app.use("/api/v1/admin", adminRouter);
 
 async function main(){
+    try{
     await mongoose.connect(process.env.MONGODB_URI);
-    app.listen(3000);
+    app.listen(3000,() =>{
     console.log("listening on port 3000");
+    });
+}catch(error){  
+    console.log("failed to connect to database");
+}
 }
 main();
