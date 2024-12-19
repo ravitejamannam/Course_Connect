@@ -1,25 +1,17 @@
-import logo from './logo.svg';
-import './App.css';
+// filepath: /Users/ravitejamannam/Course_Connect/frontend/src/App.js
+import React from 'react';
+import RoutesComponent from './routes';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './theme';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+    return (
+        <ThemeProvider theme={theme}>
+            <div className="App">
+                <RoutesComponent />
+            </div>
+        </ThemeProvider>
+    );
+};
 
 export default App;
