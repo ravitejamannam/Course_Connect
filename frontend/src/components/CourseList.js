@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getCourses, purchaseCourse } from '../api';
-import { Container, Typography, Box, Button, Card, CardContent, CardActions } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
+import CourseCard from './CourseCard';
 
 const CourseList = ({ token }) => {
     const [courses, setCourses] = useState([]);
@@ -27,17 +28,7 @@ const CourseList = ({ token }) => {
             <Box mt={5}>
                 <Typography variant="h4" gutterBottom>Courses</Typography>
                 {courses.map(course => (
-                    <Card key={course._id} sx={{ mb: 2 }}>
-                        <CardContent>
-                            <Typography variant="h5">{course.title}</Typography>
-                            <Typography variant="body2">{course.description}</Typography>
-                        </CardContent>
-                        <CardActions>
-                            <Button onClick={() => handlePurchase(course._id)} variant="contained" color="primary">
-                                Purchase
-                            </Button>
-                        </CardActions>
-                    </Card>
+                    <CourseCard key={course._id} course={course} onPurchase={handlePurchase} />
                 ))}
             </Box>
         </Container>
