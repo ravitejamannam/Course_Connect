@@ -8,6 +8,9 @@ import Purchase from './components/Purchase';
 import NavBar from './components/NavBar';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
+import Home from './components/Home';
+
+
 
 
 
@@ -34,6 +37,7 @@ const RoutesComponent = () => {
                     >
                         <Toolbar />
                         <Routes>
+                            <Route path="/" element={<Home />} />
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/signin" element={<Signin setToken={setToken} />} />
                             <Route path="/courses" element={<CourseList token={token} />} />
