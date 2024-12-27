@@ -52,9 +52,13 @@ export const purchaseCourse = async (courseId) => {
     }
 };
 
-export const getPurchases = async () => {
+export const getPurchases = async (token) => {
     try {
-        const { data } = await API.get('/user/purchases');
+        const { data } = await API.get('/user/purchases',{
+            headers: {
+                Authorization: `Bearer ${token}`,}
+            });
+        
         return data;
     } catch (error) {
         console.error('Get Purchases Error:', error.response?.data || error.message);
