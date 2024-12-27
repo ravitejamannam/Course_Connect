@@ -23,6 +23,10 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRouter);
 app.use("/api/v1/admin", adminRouter);
 
+app.get('*',(req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
 async function main(){
     try{
     await mongoose.connect(process.env.MONGODB_URI);
