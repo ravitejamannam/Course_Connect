@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Box, CssBaseline, Toolbar } from '@mui/material';
 import Signup from './components/Signup';
@@ -13,13 +13,21 @@ import Home from './components/Home';
 const drawerWidth = 240;
 
 const RoutesComponent = () => {
-    const [token, setToken] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem('token'));
+
+    useEffect(() => {
+        if (token) {
+            localStorage.setItem('token', token);
+        } else {
+            localStorage.removeItem('token');
+        }
+    }, [token]);
 
     return (
         <Router>
             <CssBaseline />
-            <NavBar />
-            <Box sx={{ display: 'flex', flexDirection: 'row', minHeight: '100vh' }}>
+            <NavBar token={token} setToken={setToken} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <Sidebar />
                 <Box
                     component="main"
