@@ -30,8 +30,8 @@ function App() {
                 >
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/signin" element={<Signin />} />
-                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/signin" element={<Signin setToken={setToken} />} />
+                        <Route path="/signup" element={<Signup setToken={setToken} />} />
                         <Route path="/profile" element={<Profile />} />
                         {/* Other routes */}
                     </Routes>

@@ -1,29 +1,20 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
-import { signup } from '../api';
+import { Box, TextField, Button, Typography, Container, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { signup } from '../api';
 
-const Signup = () => {
+const Signup = ({ setToken }) => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         firstName: '',
-        lastName: '',
+        lastName: ''
     });
-    const [token, setToken] = useState('');
-    const navigate = useNavigate();
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log('Submitting signup form:', formData); // Debug log
             const data = await signup(formData);
             if (data.token) {
                 setToken(data.token);
@@ -38,49 +29,55 @@ const Signup = () => {
 
     return (
         <Container maxWidth="sm">
-            <Box mt={5}>
-                <Typography variant="h4" gutterBottom>
-                    Signup
+            <Paper sx={{ p: 4, mt: 4 }}>
+                <Typography variant="h5" gutterBottom>
+                    Sign Up
                 </Typography>
-                <form onSubmit={handleSubmit}>
+                <Box component="form" onSubmit={handleSubmit}>
                     <TextField
                         label="First Name"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
                         fullWidth
                         margin="normal"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        required
                     />
                     <TextField
                         label="Last Name"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
                         fullWidth
                         margin="normal"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        required
                     />
                     <TextField
                         label="Email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
+                        type="email"
                         fullWidth
                         margin="normal"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
                     />
                     <TextField
                         label="Password"
-                        name="password"
                         type="password"
-                        value={formData.password}
-                        onChange={handleChange}
                         fullWidth
                         margin="normal"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        required
                     />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                        Signup
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    >
+                        Sign Up
                     </Button>
-                </form>
-            </Box>
+                </Box>
+            </Paper>
         </Container>
     );
 };

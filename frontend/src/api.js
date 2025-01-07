@@ -4,38 +4,51 @@ const API = axios.create({
     baseURL: 'http://localhost:3000/api/v1',
     headers: {
         'Content-Type': 'application/json'
-    },
-    withCredentials: true
+    }
 });
 
-API.interceptors.request.use((req) => {
-    const token = localStorage.getItem('token'); // Example: adjust as needed
-    if (token) {
-        req.headers.Authorization = `Bearer ${token}`;
+// Add request interceptor
+API.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
     }
-    return req;
-});
+);
 
 export const signup = async (userData) => {
     try {
-        console.log('Attempting signup with:', { email: userData.email }); // Debug log
+        console.log('Attempting signup with:', userData);
         const response = await API.post('/user/signup', userData);
-        console.log('Signup response:', response.data); // Debug log
+        
+        // Store token immediately after successful signup
+        if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+        }
+        
+        console.log('Signup successful:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Signup Error:', error.response?.data || error.message);
+        console.error('Signup Error:', error.response?.data || error);
         throw error;
     }
 };
 
 export const signin = async (userData) => {
     try {
-        console.log('Attempting signin with:', { email: userData.email }); // Debug log
         const response = await API.post('/user/signin', userData);
-        console.log('Signin response:', response.data); // Debug log
+        // Store token immediately after successful signin
+        if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+        }
         return response.data;
     } catch (error) {
-        console.error('Signin Error:', error.response?.data || error.message);
+        console.error('Signin Error:', error.response?.data || error);
         throw error;
     }
 };
@@ -70,6 +83,26 @@ export const getPurchases = async (token) => {
         return data;
     } catch (error) {
         console.error('Get Purchases Error:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const getProfile = async () => {
+    try {
+        const response = await API.get('/user/profile');
+        return response.data;
+    } catch (error) {
+        console.error('Profile fetch error:', error.response?.data || error);
+        throw error;
+    }
+};
+
+export const updateProfile = async (userData) => {
+    try {
+        const response = await API.put('/user/profile', userData);
+        return response.data;
+    } catch (error) {
+        console.error('Profile update error:', error.response?.data || error);
         throw error;
     }
 };

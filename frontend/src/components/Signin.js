@@ -1,61 +1,65 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box } from '@mui/material';
+import { Box, TextField, Button, Typography, Container, Paper } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { signin } from '../api';
 
 const Signin = ({ setToken }) => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
-        password: '',
+        password: ''
     });
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const data = await signin(formData);
-            setToken(data.token);
-            localStorage.setItem('token', data.token);
-            alert('Signin successful');
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                setToken(data.token);
+                navigate('/');
+            }
         } catch (error) {
-            alert('Signin failed');
+            console.error('Signin failed:', error);
+            alert(error.response?.data?.message || 'Signin failed');
         }
     };
 
     return (
         <Container maxWidth="sm">
-            <Box mt={5}>
-                <Typography variant="h4" gutterBottom>
-                    Signin
+            <Paper sx={{ p: 4, mt: 4 }}>
+                <Typography variant="h5" gutterBottom>
+                    Sign In
                 </Typography>
-                <form onSubmit={handleSubmit}>
+                <Box component="form" onSubmit={handleSubmit}>
                     <TextField
                         label="Email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
+                        type="email"
                         fullWidth
                         margin="normal"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
                     />
                     <TextField
                         label="Password"
-                        name="password"
                         type="password"
-                        value={formData.password}
-                        onChange={handleChange}
                         fullWidth
                         margin="normal"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        required
                     />
-                    <Button type="submit" variant="contained" color="primary" fullWidth>
-                        Signin
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    >
+                        Sign In
                     </Button>
-                </form>
-            </Box>
+                </Box>
+            </Paper>
         </Container>
     );
 };

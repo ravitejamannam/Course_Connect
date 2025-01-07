@@ -1,39 +1,91 @@
-const { Router } = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { z } = require("zod");
+const express = require('express');
+const userRouter = express.Router();
 const { userModel } = require("../db");
-const { JWT_USER_PASSWORD } = require("../config");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config");
+const bcrypt = require("bcrypt");
 
-const userRouter = Router();
+// Authentication middleware
+const authMiddleware = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
 
-// Zod schema for user validation
-const userSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters long"),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await userModel.findById(decoded.userId);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error('Auth error:', error);
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+// Get profile
+userRouter.get("/profile", authMiddleware, async (req, res) => {
+    try {
+        const user = await userModel.findById(req.user._id).select('-password');
+        res.json({ user });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching profile" });
+    }
 });
 
-userRouter.post("/signup", async function(req, res) {
+// Update profile
+userRouter.put("/profile", authMiddleware, async (req, res) => {
     try {
-        console.log('Received signup request:', req.body); // Debug log
-        const { email, password, firstName, lastName } = req.body;
+        const { firstName, lastName, email } = req.body;
+        const updatedUser = await userModel.findByIdAndUpdate(
+            req.user._id,
+            { firstName, lastName, email },
+            { new: true }
+        ).select('-password');
 
-        // Validate user data
-        const userValidation = userSchema.safeParse({
-            email,
-            password,
-            firstName,
-            lastName
+        res.json({ 
+            message: 'Profile updated successfully',
+            user: updatedUser 
         });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating profile" });
+    }
+});
 
-        if (!userValidation.success) {
-            return res.status(400).json({
-                message: "Validation failed",
-                errors: userValidation.error.errors
-            });
+// Signin route - update to include userId in token
+userRouter.post("/signin", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await userModel.findOne({ email });
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({ message: "Invalid credentials" });
         }
+
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET);
+        res.json({
+            token,
+            user: {
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error during signin" });
+    }
+});
+
+// Signup route
+userRouter.post("/signup", async (req, res) => {
+    try {
+        const { email, password, firstName, lastName } = req.body;
+        console.log('Received signup data:', { email, firstName, lastName }); // Debug log
 
         // Check if user already exists
         const existingUser = await userModel.findOne({ email });
@@ -55,15 +107,22 @@ userRouter.post("/signup", async function(req, res) {
         });
 
         // Generate token
-        const token = jwt.sign({ id: user._id }, JWT_USER_PASSWORD);
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET);
+
+        console.log('User created successfully:', user._id); // Debug log
 
         res.json({
             message: "User created successfully",
-            token
+            token,
+            user: {
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName
+            }
         });
 
     } catch (error) {
-        console.error('Signup error:', error); // Debug log
+        console.error('Signup error:', error);
         res.status(500).json({
             message: "Error creating user",
             error: error.message
@@ -71,26 +130,6 @@ userRouter.post("/signup", async function(req, res) {
     }
 });
 
-userRouter.post("/signin", async function(req, res) {
-    try {
-        const { email, password } = req.body;
-
-        const user = await userModel.findOne({ email });
-        if (user) {
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-            if (isPasswordValid) {
-                const token = jwt.sign({ id: user._id }, JWT_USER_PASSWORD);
-
-                res.json({ token: token });
-            } else {
-                res.status(403).json({ message: "Invalid credentials" });
-            }
-        } else {
-            res.status(403).json({ message: "Invalid credentials" });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-module.exports = { userRouter };
+module.exports = {
+    userRouter
+};

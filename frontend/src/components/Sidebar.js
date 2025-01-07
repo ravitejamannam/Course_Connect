@@ -56,7 +56,6 @@ const Sidebar = () => {
                 <List sx={{ p: 0 }}>
                     {menuItems.map((item) => (
                         <ListItem 
-                            button 
                             component={Link} 
                             to={item.path}
                             key={item.text}

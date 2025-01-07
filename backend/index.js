@@ -6,15 +6,21 @@ const path = require("path");
 const { userRouter } = require("./routes/user");
 const { courseRouter } = require("./routes/course");
 const { adminRouter } = require("./routes/admin");
+const { JWT_SECRET, MONGODB_URI } = require('./config');
 const app = express();
 
 // Middleware
 app.use(cors({
-    origin: "http://localhost:3000"
+    origin: "http://localhost:3001",
+    credentials: true
 }));
 app.use(express.json());
 
-
+// Verify JWT_SECRET is set
+if (!JWT_SECRET) {
+    console.error('JWT_SECRET is not set!');
+    process.exit(1);
+}
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRouter);
@@ -22,16 +28,13 @@ app.use("/api/v1/admin", adminRouter);
 
 // The "catchall" handler: for any request that doesn't match one above, send back React's index.html file.
 
+// Connect to MongoDB
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
-async function main() {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        app.listen(3000, () => {
-            console.log("listening on port 3000");
-        });
-    } catch (error) {
-        console.error("Failed to connect to the database", error);
-        process.exit(1);
-    }
-}
-main();
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

@@ -1,7 +1,4 @@
-const JWT_USER_PASSWORD = process.env.JWT_USER_PASSWORD
-const JWT_ADMIN_PASSWORD = process.env.JWT_ADMIN_PASSWORD;
-
 module.exports = {
-    JWT_USER_PASSWORD,
-    JWT_ADMIN_PASSWORD
-}
+    JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key-here',
+    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/courseconnect'
+};
