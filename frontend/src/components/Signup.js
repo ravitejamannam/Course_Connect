@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Container, TextField, Button, Typography, Box } from '@mui/material';
 import { signup } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
     const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const Signup = () => {
         firstName: '',
         lastName: '',
     });
+    const [token, setToken] = useState('');
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -20,10 +23,16 @@ const Signup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await signup(formData);
-            alert('Signup successful');
+            console.log('Submitting signup form:', formData); // Debug log
+            const data = await signup(formData);
+            if (data.token) {
+                setToken(data.token);
+                localStorage.setItem('token', data.token);
+                navigate('/');
+            }
         } catch (error) {
-            alert('Signup failed');
+            console.error('Signup failed:', error);
+            alert(error.response?.data?.message || 'Signup failed');
         }
     };
 

@@ -17,36 +17,57 @@ const userSchema = z.object({
 
 userRouter.post("/signup", async function(req, res) {
     try {
-        // Validate user data
-        const validation = userSchema.safeParse(req.body);
-        if (!validation.success) {
-            return res.status(400).json({ errors: validation.error.errors });
-        }
-
+        console.log('Received signup request:', req.body); // Debug log
         const { email, password, firstName, lastName } = req.body;
 
-        // Check if the email already exists
-        const existingUser = await userModel.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "Email already in use" });
+        // Validate user data
+        const userValidation = userSchema.safeParse({
+            email,
+            password,
+            firstName,
+            lastName
+        });
+
+        if (!userValidation.success) {
+            return res.status(400).json({
+                message: "Validation failed",
+                errors: userValidation.error.errors
+            });
         }
 
-        // Hash the password
+        // Check if user already exists
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                message: "User already exists"
+            });
+        }
+
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create a new user
-        await userModel.create({
-            email: email,
+        // Create user
+        const user = await userModel.create({
+            email,
             password: hashedPassword,
-            firstName: firstName,
-            lastName: lastName,
+            firstName,
+            lastName
         });
 
+        // Generate token
+        const token = jwt.sign({ id: user._id }, JWT_USER_PASSWORD);
+
         res.json({
-            message: "Signup succeeded",
+            message: "User created successfully",
+            token
         });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Signup error:', error); // Debug log
+        res.status(500).json({
+            message: "Error creating user",
+            error: error.message
+        });
     }
 });
 

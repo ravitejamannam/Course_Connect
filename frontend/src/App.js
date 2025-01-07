@@ -6,6 +6,8 @@ import Sidebar from './components/Sidebar';
 import Profile from './components/Profile';
 import { Box } from '@mui/material';
 import Home from './components/Home';
+import Signin from './components/Signin';
+import Signup from './components/Signup';
 
 function App() {
     const [token, setToken] = useState(localStorage.getItem('token'));
@@ -27,8 +29,10 @@ function App() {
                     }}
                 >
                     <Routes>
-                        <Route path="/profile" element={<Profile />} />
                         <Route path="/" element={<Home />} />
+                        <Route path="/signin" element={<Signin />} />
+                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/profile" element={<Profile />} />
                         {/* Other routes */}
                     </Routes>
                 </Box>
