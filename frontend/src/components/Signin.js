@@ -18,19 +18,12 @@ const Signin = ({ setToken }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log('Attempting signin with:', { email: formData.email });
             const data = await signin(formData);
-            if (!data || !data.token) {
-                throw new Error('Invalid response from server');
-            }
             setToken(data.token);
             localStorage.setItem('token', data.token);
             alert('Signin successful');
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Signin failed';
-            const errorDetail = error.response?.data?.detail || 'Please check your credentials';
-            console.error('Signin error:', { message: errorMessage, detail: errorDetail });
-            alert(`${errorMessage}: ${errorDetail}`);
+            alert('Signin failed');
         }
     };
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: 'http://localhost:3000/api/v1',
+    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api/v1',
     headers: {
         'Content-Type': 'application/json'
     },
@@ -18,7 +18,7 @@ API.interceptors.request.use((req) => {
 
 export const signup = async (userData) => {
     try {
-        const { data } = await axios.post('http://localhost:3000/api/v1/user/signup', userData);
+        const { data } = await API.post('/user/signup', userData);
         return data;
     } catch (error) {
         console.error('Signup Error:', error.response?.data || error.message);
@@ -26,11 +26,10 @@ export const signup = async (userData) => {
     }
 };
 
-export const signin = async (formData) => {
+export const signin = async (userData) => {
     try {
-        console.log('Attempting signin with:', { email: formData.email }); // Debug log
-        const response = await API.post('/user/signin', formData);
-        return response.data;
+        const { data } = await API.post('/user/signin', userData);
+        return data;
     } catch (error) {
         console.error('Signin Error:', error.response?.data || error.message);
         throw error;
