@@ -7,6 +7,7 @@ const { userRouter } = require("./routes/user");
 const { courseRouter } = require("./routes/course");
 const { adminRouter } = require("./routes/admin");
 const { JWT_SECRET, MONGODB_URI } = require('./config');
+const { paymentRouter } = require('./routes/payment');
 const app = express();
 
 // Middleware
@@ -25,6 +26,10 @@ if (!JWT_SECRET) {
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/payment", paymentRouter);
+
+// Static files for uploads
+app.use('/uploads', express.static('uploads'));
 
 // The "catchall" handler: for any request that doesn't match one above, send back React's index.html file.
 

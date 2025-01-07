@@ -9,7 +9,17 @@ const userSchema = new Schema({
     password: String,
     firstName: String,
     lastName: String,
-});
+    purchasedCourses: [{
+        courseId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Course'
+        },
+        purchaseDate: {
+            type: Date,
+            default: Date.now
+        }
+    }]
+}, { timestamps: true });
 
 const adminSchema = new Schema({
     email: { type: String, unique: true },
@@ -19,12 +29,37 @@ const adminSchema = new Schema({
 });
 
 const courseSchema = new Schema({
-    title: String,
-    description: String,
-    price: Number,
-    imageUrl: String,
-    creatorId: ObjectId
-});
+    title: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    price: {
+        type: Number,
+        required: true
+    },
+    originalPrice: {
+        type: Number,
+        required: true
+    },
+    imageUrl: {
+        type: String,
+        required: true
+    },
+    published: {
+        type: Boolean,
+        default: true
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
+}, { timestamps: true });
 
 const purchaseSchema = new Schema({
     userId: ObjectId,

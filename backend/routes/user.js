@@ -23,7 +23,6 @@ const authMiddleware = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        console.error('Auth error:', error);
         return res.status(401).json({ message: 'Invalid token' });
     }
 };
@@ -31,10 +30,17 @@ const authMiddleware = async (req, res, next) => {
 // Get profile
 userRouter.get("/profile", authMiddleware, async (req, res) => {
     try {
-        const user = await userModel.findById(req.user._id).select('-password');
+        const user = await userModel.findById(req.user._id)
+            .select('-password')
+            .populate('purchasedCourses.courseId');
+        
         res.json({ user });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching profile" });
+        console.error('Profile fetch error:', error);
+        res.status(500).json({ 
+            message: "Error fetching profile",
+            error: error.message 
+        });
     }
 });
 
@@ -49,11 +55,15 @@ userRouter.put("/profile", authMiddleware, async (req, res) => {
         ).select('-password');
 
         res.json({ 
-            message: 'Profile updated successfully',
+            message: "Profile updated successfully",
             user: updatedUser 
         });
     } catch (error) {
-        res.status(500).json({ message: "Error updating profile" });
+        console.error('Profile update error:', error);
+        res.status(500).json({ 
+            message: "Error updating profile",
+            error: error.message 
+        });
     }
 });
 

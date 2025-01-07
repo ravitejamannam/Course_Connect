@@ -8,6 +8,8 @@ import { Box } from '@mui/material';
 import Home from './components/Home';
 import Signin from './components/Signin';
 import Signup from './components/Signup';
+import Courses from './components/Courses';
+import CourseForm from './components/admin/CourseForm';
 
 function App() {
     const [token, setToken] = useState(localStorage.getItem('token'));
@@ -33,6 +35,8 @@ function App() {
                         <Route path="/signin" element={<Signin setToken={setToken} />} />
                         <Route path="/signup" element={<Signup setToken={setToken} />} />
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/courses" element={<Courses />} />
+                        <Route path="/admin/courses/new" element={<CourseForm />} />
                         {/* Other routes */}
                     </Routes>
                 </Box>

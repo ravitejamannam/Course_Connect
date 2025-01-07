@@ -1,111 +1,132 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Container } from '@mui/material';
+import { 
+    AppBar, 
+    Toolbar, 
+    Typography, 
+    Button, 
+    Box, 
+    Container,
+    IconButton,
+    Menu,
+    MenuItem,
+    Avatar
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
+import { AccountCircle } from '@mui/icons-material';
 
 const NavBar = ({ token, setToken }) => {
     const navigate = useNavigate();
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     const handleLogout = () => {
-        setToken(null);
         localStorage.removeItem('token');
+        setToken(null);
+        handleClose();
         navigate('/');
     };
 
     return (
-        <AppBar 
-            position="fixed" 
-            sx={{ 
-                backgroundColor: 'white', 
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                color: 'black',
-                zIndex: (theme) => theme.zIndex.drawer + 1
-            }}
-        >
-            <Container maxWidth="lg">
-                <Toolbar 
-                    sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        minHeight: '64px'
-                    }}
-                >
-                    {/* Logo/Brand Section */}
-                    <Typography 
-                        component={Link} 
-                        to="/" 
-                        sx={{ 
+        <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            <Container maxWidth="xl">
+                <Toolbar>
+                    <Typography
+                        variant="h6"
+                        component={Link}
+                        to="/"
+                        sx={{
+                            flexGrow: 1,
                             textDecoration: 'none',
-                            color: '#1976d2',
-                            fontWeight: 700,
-                            fontSize: '24px'
+                            color: 'inherit',
+                            fontWeight: 600
                         }}
                     >
                         Course Connect
                     </Typography>
 
-                    {/* Auth Buttons */}
-                    <Box sx={{ 
-                        display: 'flex', 
-                        gap: 2,
-                        alignItems: 'center'
-                    }}>
-                        {!token ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Button
+                            component={Link}
+                            to="/courses"
+                            color="inherit"
+                        >
+                            Courses
+                        </Button>
+
+                        {token ? (
                             <>
-                                <Button 
-                                    component={Link} 
+                                <IconButton
+                                    size="large"
+                                    onClick={handleMenu}
+                                    color="inherit"
+                                >
+                                    <Avatar sx={{ width: 32, height: 32 }}>
+                                        <AccountCircle />
+                                    </Avatar>
+                                </IconButton>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleClose}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right',
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                >
+                                    <MenuItem 
+                                        component={Link} 
+                                        to="/profile"
+                                        onClick={handleClose}
+                                    >
+                                        Profile
+                                    </MenuItem>
+                                    <MenuItem 
+                                        component={Link} 
+                                        to="/my-courses"
+                                        onClick={handleClose}
+                                    >
+                                        My Courses
+                                    </MenuItem>
+                                    <MenuItem onClick={handleLogout}>
+                                        Logout
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    component={Link}
                                     to="/signin"
+                                    color="inherit"
                                     variant="outlined"
-                                    sx={{ 
-                                        textTransform: 'none',
-                                        borderRadius: '8px',
-                                        color: '#1976d2',
-                                        borderColor: '#1976d2',
+                                    sx={{
+                                        borderColor: 'white',
                                         '&:hover': {
-                                            borderColor: '#1565c0',
-                                            backgroundColor: 'rgba(25, 118, 210, 0.04)'
+                                            borderColor: 'white',
+                                            bgcolor: 'rgba(255, 255, 255, 0.1)'
                                         }
                                     }}
                                 >
                                     Sign In
                                 </Button>
-                                <Button 
-                                    component={Link} 
+                                <Button
+                                    component={Link}
                                     to="/signup"
                                     variant="contained"
-                                    sx={{ 
-                                        textTransform: 'none',
-                                        borderRadius: '8px',
-                                        backgroundColor: '#1976d2',
-                                        '&:hover': {
-                                            backgroundColor: '#1565c0'
-                                        }
-                                    }}
+                                    color="secondary"
                                 >
                                     Sign Up
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Button 
-                                    component={Link} 
-                                    to="/profile"
-                                    sx={{ 
-                                        color: 'text.primary',
-                                        textTransform: 'none'
-                                    }}
-                                >
-                                    Profile
-                                </Button>
-                                <Button 
-                                    onClick={handleLogout}
-                                    variant="outlined"
-                                    sx={{ 
-                                        textTransform: 'none',
-                                        borderRadius: '8px'
-                                    }}
-                                >
-                                    Logout
                                 </Button>
                             </>
                         )}

@@ -55,20 +55,20 @@ export const signin = async (userData) => {
 
 export const getCourses = async () => {
     try {
-        const { data } = await API.get('/course/preview');
-        return data;
+        const response = await API.get('/courses');
+        return response.data;
     } catch (error) {
-        console.error('Get Courses Error:', error.response?.data || error.message);
+        console.error('Error fetching courses:', error);
         throw error;
     }
 };
 
 export const purchaseCourse = async (courseId) => {
     try {
-        const { data } = await API.post('/course/purchase', { courseId });
-        return data;
+        const response = await API.post(`/courses/${courseId}/purchase`);
+        return response.data;
     } catch (error) {
-        console.error('Purchase Course Error:', error.response?.data || error.message);
+        console.error('Purchase error:', error.response?.data || error);
         throw error;
     }
 };
@@ -103,6 +103,40 @@ export const updateProfile = async (userData) => {
         return response.data;
     } catch (error) {
         console.error('Profile update error:', error.response?.data || error);
+        throw error;
+    }
+};
+
+export const createCourse = async (courseData) => {
+    try {
+        const response = await API.post('/courses', courseData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error creating course:', error);
+        throw error;
+    }
+};
+
+export const createPaymentOrder = async (courseId) => {
+    try {
+        const response = await API.post('/payment/create-order', { courseId });
+        return response.data;
+    } catch (error) {
+        console.error('Payment order creation error:', error);
+        throw error;
+    }
+};
+
+export const verifyPayment = async (paymentData) => {
+    try {
+        const response = await API.post('/payment/verify', paymentData);
+        return response.data;
+    } catch (error) {
+        console.error('Payment verification error:', error);
         throw error;
     }
 };
