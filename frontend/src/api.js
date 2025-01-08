@@ -140,3 +140,15 @@ export const verifyPayment = async (paymentData) => {
         throw error;
     }
 };
+
+// User Registration
+export const registerUser = async (userData) => {
+    const response = await API.post('/user/register', userData);
+    return response.data;
+};
+
+// User Signin
+export const signinUser = async (userData) => {
+    const response = await API.post('/user/signin', userData);
+    return response.data;
+};

@@ -1,83 +1,90 @@
 import React, { useState } from 'react';
-import { Box, TextField, Button, Typography, Container, Paper } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { signup } from '../api';
+import { TextField, Button, Container, Typography, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { registerUser } from '../api'; // Assume you have an API function to handle registration
 
-const Signup = ({ setToken }) => {
-    const navigate = useNavigate();
+const Signup = () => {
     const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
-        firstName: '',
-        lastName: ''
+        role: 'user' // Default role
     });
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const data = await signup(formData);
-            if (data.token) {
-                setToken(data.token);
-                localStorage.setItem('token', data.token);
-                navigate('/');
-            }
+            const response = await registerUser(formData);
+            alert('Registration successful!');
+            // Optionally redirect or clear the form
         } catch (error) {
-            console.error('Signup failed:', error);
-            alert(error.response?.data?.message || 'Signup failed');
+            console.error('Registration error:', error);
+            alert('Failed to register');
         }
     };
 
     return (
-        <Container maxWidth="sm">
-            <Paper sx={{ p: 4, mt: 4 }}>
-                <Typography variant="h5" gutterBottom>
-                    Sign Up
-                </Typography>
-                <Box component="form" onSubmit={handleSubmit}>
-                    <TextField
-                        label="First Name"
-                        fullWidth
-                        margin="normal"
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+        <Container>
+            <Typography variant="h4" gutterBottom>Signup</Typography>
+            <form onSubmit={handleSubmit}>
+                <TextField 
+                    name="firstName" 
+                    label="First Name" 
+                    onChange={handleChange} 
+                    required 
+                    fullWidth 
+                    margin="normal" 
+                />
+                <TextField 
+                    name="lastName" 
+                    label="Last Name" 
+                    onChange={handleChange} 
+                    required 
+                    fullWidth 
+                    margin="normal" 
+                />
+                <TextField 
+                    name="email" 
+                    label="Email" 
+                    type="email" 
+                    onChange={handleChange} 
+                    required 
+                    fullWidth 
+                    margin="normal" 
+                />
+                <TextField 
+                    name="password" 
+                    label="Password" 
+                    type="password" 
+                    onChange={handleChange} 
+                    required 
+                    fullWidth 
+                    margin="normal" 
+                />
+                
+                {/* Dropdown for Role Selection */}
+                <FormControl fullWidth margin="normal">
+                    <InputLabel id="role-label">Role</InputLabel>
+                    <Select
+                        labelId="role-label"
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
                         required
-                    />
-                    <TextField
-                        label="Last Name"
-                        fullWidth
-                        margin="normal"
-                        value={formData.lastName}
-                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        required
-                    />
-                    <TextField
-                        label="Email"
-                        type="email"
-                        fullWidth
-                        margin="normal"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                    />
-                    <TextField
-                        label="Password"
-                        type="password"
-                        fullWidth
-                        margin="normal"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        required
-                    />
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        fullWidth
-                        sx={{ mt: 2 }}
                     >
-                        Sign Up
-                    </Button>
-                </Box>
-            </Paper>
+                        <MenuItem value="user">User</MenuItem>
+                        <MenuItem value="admin">Admin</MenuItem>
+                    </Select>
+                </FormControl>
+
+                <Button type="submit" variant="contained" color="primary" fullWidth>
+                    Register
+                </Button>
+            </form>
         </Container>
     );
 };

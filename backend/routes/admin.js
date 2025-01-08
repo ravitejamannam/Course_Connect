@@ -61,7 +61,7 @@ adminRouter.post("/signin", async function(req, res) {
             if (isPasswordValid) {
                 const token = jwt.sign({ id: admin._id }, JWT_ADMIN_PASSWORD);
 
-                // TODO: cookie logic/session logic
+                
                 res.json({ token: token });
             } else {
                 res.status(403).json({ message: "Invalid credentials" });

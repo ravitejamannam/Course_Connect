@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
     purchasedCourses: [{
         courseId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -30,12 +35,7 @@ const userSchema = new mongoose.Schema({
             type: Date,
             default: Date.now
         }
-    }],
-    role: {
-        type: String,
-        enum: ['user', 'admin'],
-        default: 'user'
-    }
+    }]
 }, { timestamps: true });
 
 const userModel = mongoose.model('User', userSchema);

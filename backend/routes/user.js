@@ -140,6 +140,84 @@ userRouter.post("/signup", async (req, res) => {
     }
 });
 
+userRouter.post('/register', async (req, res) => {
+    const { firstName, lastName, email, password, role } = req.body; // Include role
+
+    try {
+        // Check if the user already exists
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create a new user with the specified role
+        const newUser = await userModel.create({
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+            role: role || 'user' // Default to 'user' if not provided
+        });
+
+        // Generate a token
+        const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(201).json({
+            message: 'User registered successfully',
+            user: {
+                id: newUser._id,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                email: newUser.email,
+                role: newUser.role
+            },
+            token // Send the token back to the client
+        });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ message: 'Error registering user', error: error.message });
+    }
+});
+
+userRouter.post('/signin', async (req, res) => {
+    const { email, password, role } = req.body; // Include role if needed
+
+    try {
+        // Find the user by email
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+
+        // Check if the password is correct
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        // Generate a token
+        const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+
+        res.status(200).json({
+            message: 'Signin successful',
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                role: user.role
+            },
+            token // Send the token back to the client
+        });
+    } catch (error) {
+        console.error('Signin error:', error);
+        res.status(500).json({ message: 'Error signing in', error: error.message });
+    }
+});
+
 module.exports = {
     userRouter
 };
