@@ -8,7 +8,15 @@ const { courseRouter } = require("./routes/course");
 const { adminRouter } = require("./routes/admin");
 const { JWT_SECRET, MONGODB_URI } = require('./config');
 const { paymentRouter } = require('./routes/payment');
+const cloudinary = require('cloudinary').v2;
 const app = express();
+
+// Cloudinary configuration
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Middleware
 app.use(cors({
@@ -16,6 +24,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Verify JWT_SECRET is set
 if (!JWT_SECRET) {

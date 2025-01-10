@@ -14,7 +14,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { AccountCircle } from '@mui/icons-material';
 
-const NavBar = ({ token, setToken }) => {
+const NavBar = ({ user, setUser }) => {
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -27,8 +27,8 @@ const NavBar = ({ token, setToken }) => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        setToken(null);
+        localStorage.removeItem('user');
+        setUser(null);
         handleClose();
         navigate('/');
     };

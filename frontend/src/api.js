@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// Define the API_URL
+const API_URL = 'http://localhost:3000/api/v1'; // Adjust this based on your backend URL
+
 const API = axios.create({
     baseURL: 'http://localhost:3000/api/v1',
     headers: {
@@ -150,5 +153,20 @@ export const registerUser = async (userData) => {
 // User Signin
 export const signinUser = async (userData) => {
     const response = await API.post('/user/signin', userData);
+    return response.data;
+};
+
+export const fetchUserData = async () => {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_URL}/user/profile`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+    return response.data;
+};
+
+export const fetchCourses = async () => {
+    const response = await axios.get(`${API_URL}/courses`);
     return response.data;
 };

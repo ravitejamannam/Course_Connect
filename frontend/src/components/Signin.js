@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { TextField, Button, Container, Typography, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import { signinUser } from '../api'; // Assume you have an API function to handle signin
+import {useNavigate} from "react-router-dom"
 
 const Signin = () => {
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         role: 'user' // Default role
     });
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,7 +22,14 @@ const Signin = () => {
         try {
             const response = await signinUser(formData);
             alert('Signin successful!');
-            // Optionally redirect or clear the form
+            login(response.token);
+            console.log(response.token);
+            
+            // Store the token in local storage
+            localStorage.setItem('token', response.token); // Adjust based on your response structure
+
+            // Optionally redirect to the dashboard
+            navigate('/courses'); // Uncomment if using react-router
         } catch (error) {
             console.error('Signin error:', error);
             alert('Failed to sign in');
